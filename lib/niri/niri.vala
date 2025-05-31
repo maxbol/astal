@@ -163,6 +163,45 @@ public class Niri : Object {
         }
     }
 
+    public async Json.Node? action(string actionName, owned Json.Node? params) {
+      if (params == null) {
+        params = new Json.Node.alloc();
+        params.init_object(new Json.Object());
+      }
+
+      var b = new Json.Builder();
+      b.begin_object();
+      {
+        b.set_member_name("Action");
+        b.begin_object();
+        {
+          b.set_member_name(actionName);
+          b.add_value(params);
+        }
+        b.end_object();
+      }
+      b.end_object();
+
+      return yield this.message_async(b.get_root());
+    }
+
+    public async Json.Node? action_focus_workspace_by_id(int64 id) {
+      var b = new Json.Builder();
+      b.begin_object();
+      {
+        b.set_member_name("reference");
+        b.begin_object();
+        {
+          b.set_member_name("Id");
+          b.add_int_value(id);
+        }
+        b.end_object();
+      }
+      b.end_object();
+
+      return yield this.action("FocusWorkspace", b.get_root());
+    }
+
     private Json.Node? message(Json.Node message) {
         var ipc = IPC.connect();
         if (ipc == null) return null;
