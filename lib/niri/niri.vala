@@ -185,17 +185,18 @@ public class Niri : Object {
       return yield this.message_async(b.get_root());
     }
 
-    public async Json.Node? action_focus_workspace_by_id(int64 id) {
+    public async Json.Node? action_focus_workspace(WorkspaceReferenceArg reference_arg) {
       var b = new Json.Builder();
+
       b.begin_object();
       {
-        b.set_member_name("reference");
-        b.begin_object();
-        {
-          b.set_member_name("Id");
-          b.add_int_value(id);
+        var reference_arg_json = WorkspaceReferenceArg.to_json(reference_arg);
+        if (reference_arg_json == null) {
+          return null;
         }
-        b.end_object();
+
+        b.set_member_name("reference");
+        b.add_value(reference_arg_json);
       }
       b.end_object();
 
@@ -235,7 +236,7 @@ public class Niri : Object {
     private void on_workspaces_changed(Json.Object event) {
         var workspaces_arr = event.get_array_member("workspaces");
 
-        _outputs.remove_all();
+        // _outputs.remove_all();
         _workspaces.remove_all();
         foreach (var element in workspaces_arr.get_elements()) {
             var workspace = new Workspace.from_json(element.get_object());
@@ -409,6 +410,11 @@ public class Niri : Object {
     public unowned Workspace? get_workspace(int64 id) {
         if (id < 0) return null;
         return _workspaces.get(id);
+    }
+
+    public unowned Output? get_output(string name) {
+        if (name == "") return null;
+        return _outputs.get(name);
     }
 
     // on_workspaces_changed

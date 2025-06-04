@@ -47,4 +47,39 @@ public struct Mode {
         is_preferred = object.get_boolean_member("is_preferred");
     }
 }
+
+public const int64 WORKSPACE_REFERENCE_ARG_ID = 0x01;
+public const int64 WORKSPACE_REFERENCE_ARG_INDEX = 0x02;
+public const int64 WORKSPACE_REFERENCE_ARG_NAME = 0x03;
+
+public struct WorkspaceReferenceArg {
+    public int64 variant;
+    public int64 id;
+    public int64 index;
+    public string name;
+
+    public static Json.Node? WorkspaceReferenceArg.to_json(WorkspaceReferenceArg wra) {
+      var builder = new Json.Builder();
+      builder.begin_object();
+      switch (wra.variant) {
+        case WORKSPACE_REFERENCE_ARG_INDEX:
+          builder.set_member_name("Index");
+          builder.add_int_value(wra.index);
+          break;
+        case WORKSPACE_REFERENCE_ARG_ID:
+          builder.set_member_name("Id");
+          builder.add_int_value(wra.id);
+          break;
+        case WORKSPACE_REFERENCE_ARG_NAME:
+          builder.set_member_name("Name");
+          builder.add_string_value(wra.name);
+          break;
+        default:
+          critical("Unrecognized WorkspaceReferenceArg variant");
+          return null;
+      }
+      builder.end_object();
+      return builder.get_root();
+    }
+}
 }

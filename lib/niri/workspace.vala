@@ -17,17 +17,29 @@ public class Workspace : Object {
     public bool is_focused { get; internal set; }
     /** id of the active window on the workspace */
     public uint64 active_window_id {get; internal set;}
-    /* public List<weak Window> windows { owned get {
-     return Niri._windows.get_values().copy(); 
-    } } */
+    public List<weak Window> windows { owned get {
+     return _windows.copy(); 
+    } }
 
-    // private List<weak Window> _windows = new List<weak Window>();
+    private List<weak Window> _windows = new List<weak Window>();
     // public List<weak Window> windows { owned get { return _windows.copy(); } }
 
     /** Emitted when a workspace was activated on an output. */
     public signal void activated();
     /** Emitted when the window changes on a workspace. */
     public signal void active_window_changed(uint64? id);
+
+    internal List<weak Window> filter_windows() {
+      var niri = Niri.get_default();
+      var list = new List<weak Window>();
+      foreach (var window in niri.windows) {
+        if (window.workspace_id == id) {
+          list.append(window);
+        }
+      }
+
+      return list;
+    }
 
     internal Workspace.from_json(Json.Object object) {
         sync(object);
@@ -51,6 +63,12 @@ public class Workspace : Object {
 
         if (_output.is_null()) { output = null;}
         else { output = _output.get_string(); }
+
+        var list = filter_windows();
+        if (_windows.length() != list.length()) {
+          _windows = list.copy();
+          notify_property("windows");
+        }
     }
 
     public unowned Window? get_active_window() {
