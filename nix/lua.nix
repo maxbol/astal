@@ -54,7 +54,6 @@ in
       runHook preInstall
 
       mkdir -p $out/bin
-      cp -r * $out/bin
       echo '${script}' > astal-lua
       install -m 755 astal-lua $out/bin/${name}
 
